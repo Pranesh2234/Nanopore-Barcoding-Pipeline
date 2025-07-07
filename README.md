@@ -214,9 +214,3 @@ Columns:
 ## 📞 Support
 
 For issues or feature requests, please open an issue on GitHub or contact `Pranesh Kulasekhar`.
-
----
-
-## 📄 License
-
-This project is released under the MIT License.

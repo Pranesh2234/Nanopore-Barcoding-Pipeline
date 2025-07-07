@@ -1,4 +1,4 @@
-# 🔬 Nanopore Barcode-to-Consensus Pipeline
+# 🔬 Nanopore Barcoding Pipeline
 
 This repository provides a robust and scalable pipeline to process Nanopore sequencing data, extract barcode and ORF sequences, generate consensus sequences using Medaka, and annotate variants with reference-based comparison. This workflow is ideal for experiments involving high-throughput barcode-tagged libraries such as deep mutational scanning, functional screens, or lineage tracing.
 

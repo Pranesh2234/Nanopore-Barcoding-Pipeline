@@ -1,19 +1,16 @@
-# HTCondor submit file for running the full barcode-to-consensus pipeline
+# HTCondor submit file 
 universe = vanilla
 
-# Use the same executable bash script
+# Executable bash script
 executable = run_pipeline.sh
-
-# Environment variables passed to the job
-#getenv = True
 
 # Output files
 output = logs/pipeline.out
 error = logs/pipeline.err
 log = logs/pipeline.log
 
-stream_output = True
-stream_error  = True
+stream_output = TRUE
+stream_error  = TRUE
 
 # Request resources
 request_memory = 64 GB

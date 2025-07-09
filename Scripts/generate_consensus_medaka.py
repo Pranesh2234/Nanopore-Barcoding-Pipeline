@@ -27,10 +27,13 @@ def get_optimal_threads_per_gpu(num_gpus):
 def process_single_file(args):
     input_path, reference_path, output_dir, min_seqs, gpu_id, threads = args
     fasta_file = os.path.basename(input_path)
-
-    tmp_dir = None  # Initialize to avoid UnboundLocalError
+    tmp_dir = None
 
     try:
+        # Validate input FASTA
+        if not os.path.exists(input_path) or os.path.getsize(input_path) == 0:
+            return f"⚠️ Input FASTA {fasta_file} is empty or missing"
+
         seq_count = sum(1 for _ in SeqIO.parse(input_path, "fasta"))
         if seq_count < min_seqs:
             return f"⏭️ Skipped {fasta_file} ({seq_count} sequences)"
@@ -39,26 +42,33 @@ def process_single_file(args):
         tmp_dir = os.path.join(output_dir, f"tmp_{sample_name}")
         os.makedirs(tmp_dir, exist_ok=True)
 
-        # Alignment steps
         sam_path = os.path.join(tmp_dir, "aligned.sam")
         bam_path = os.path.join(tmp_dir, "aligned.bam")
         sorted_bam = os.path.join(tmp_dir, "aligned.sorted.bam")
+        consensus_out = os.path.join(output_dir, f"{sample_name}_consensus.fa")
 
-        cmd_minimap = [MINIMAP2, "-a", reference_path, input_path]
-        minimap_proc = subprocess.run(cmd_minimap, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        if minimap_proc.returncode != 0 or not minimap_proc.stdout:
-            return f"❌ Minimap2 failed for {fasta_file}: {minimap_proc.stderr.decode()}"
-
+        # Run Minimap2 with safer flags
+        cmd_minimap = [MINIMAP2, "-a", "--secondary=no", "--eqx", reference_path, input_path]
         with open(sam_path, "w") as sam_out:
-            sam_out.write(minimap_proc.stdout.decode())
+            minimap_proc = subprocess.run(cmd_minimap, stdout=sam_out, stderr=subprocess.PIPE)
+            if minimap_proc.returncode != 0:
+                return f"❌ Minimap2 failed for {fasta_file}: {minimap_proc.stderr.decode()}"
 
+        # Check if SAM file has headers
+        if not os.path.exists(sam_path) or os.path.getsize(sam_path) == 0:
+            return f"❌ Minimap2 produced empty or missing SAM file for {fasta_file}"
+        with open(sam_path) as sam_check:
+            if not any(line.startswith("@") for line in sam_check):
+                return f"❌ SAM file missing header for {fasta_file}"
+
+        # Convert and sort BAM
         subprocess.run([SAMTOOLS, "view", "-bS", sam_path, "-o", bam_path], check=True)
         subprocess.run([SAMTOOLS, "sort", bam_path, "-o", sorted_bam], check=True)
         subprocess.run([SAMTOOLS, "index", sorted_bam], check=True)
 
+        # Run Medaka
         env = os.environ.copy()
         env["CUDA_VISIBLE_DEVICES"] = str(gpu_id)
-
         cmd_medaka = [
             "nanopore_gpuenv/bin/medaka_consensus",
             "-i", input_path,
@@ -74,9 +84,8 @@ def process_single_file(args):
         if medaka_proc.returncode != 0:
             return f"❌ Medaka failed for {fasta_file}: {medaka_proc.stderr}"
 
+        # Save consensus
         consensus_tmp = os.path.join(tmp_dir, "consensus.fasta")
-        consensus_out = os.path.join(output_dir, f"{sample_name}_consensus.fa")
-
         if os.path.exists(consensus_tmp):
             shutil.copyfile(consensus_tmp, consensus_out)
             return f"✅ Done: {fasta_file} → {consensus_out}"

@@ -12,7 +12,7 @@ This repository provides a robust and scalable pipeline to process Nanopore sequ
 - Medaka-based GPU-accelerated consensus generation
 - Variant calling using Minimap2, Samtools, and Bcftools
 - HTCondor integration for large-scale deployment
-- Automatic GPU monitoring and conda environment handling
+- Automatic conda environment handling
 
 ---
 
@@ -133,11 +133,17 @@ This tarball contains a fully pre-configured conda environment with:
 - Samtools, Bcftools
 - Minimap2
 
-The tarball can be installed from `https://drive.google.com/file/d/1z4pHmtPRKTFgH8KKrdxAghc7tToUImHS/view?usp=drive_link
-`
+[Click here to download the prebuilt conda environment](https://drive.google.com/file/d/1z4pHmtPRKTFgH8KKrdxAghc7tToUImHS/view?usp=drive_link)
+
+
+Once downloaded transfer to your working node using `scp command from your local terminal` 
+
+example: `scp nanopore_gpuenv.tar.gz username@domain:path/to/directory`
+
+
 **Unpacking and activating:**
 
-```
+```bash
 tar -xzf nanopore_gpuenv.tar.gz
 export PATH=$PWD/nanopore_gpuenv/bin:$PATH
 export LD_LIBRARY_PATH=$PWD/nanopore_gpuenv/lib:$LD_LIBRARY_PATH
@@ -152,7 +158,7 @@ The bash wrapper (`run_pipeline.sh`) performs these steps automatically and also
 
 The pipeline is optimized for distributed compute clusters with GPU support via HTCondor.
 
-### Submit File: `submit_pipeline.sub`
+### Submit File: `pipeline.submit`
 
 - Requests 5 GPUs, 64 GB RAM, and 500 GB disk
 - Runs `run_pipeline.sh`
@@ -180,8 +186,9 @@ The pipeline is optimized for distributed compute clusters with GPU support via 
 ### HTCondor Cluster
 - Most of the datasets which are large will be run using the HTCondor cluster.
 - For submitting a job to HTC, use the following command after creating a submit file. (for example: pipeline.submimt)
-
- `condor_submit pipeline.submit`
+```bash
+condor_submit pipeline.submit
+```
 
 ---
 
@@ -219,11 +226,59 @@ This file summarizes per-barcode consensus sequences and variants.
 - Make sure that before submit `logs/` directory exists
 
 ---
+## Full setup instructions
 
-## 📞 Support
-
-For bugs, feature requests, or help with deployment, open an issue or contact:
-
-**Pranesh Kulasekhar**
+- Download environment from link
+  - Transfer to working node using `scp`
+- Create submit file: pipeline.submit
+  - A submit file is the way to request resources from HTC.
+  - The submit file given here is setup to use 5 gpus
+  - Make sure to change the names of the fasta and fastq files you want to transfer in the submit file at the following line:
+    ```
+    transfer input files = ....
+    ```
+  - The amount of disk usage and memory requested in the given submit file is tailored to a different dataset (24 GB fastq file). Feel free to increase or decrease according to your dataset in the following lines:
+    ```
+    request_disk = ...
+    request_memory = ...
+    ```
+  - All other lines can be used as they are
+     
+- Create bash wrapper: run_pipline.sh
+   - The bash wrapper displays output as the pipeline processes the different steps in sequential order
+   - Make sure to change the regular expressions acoording to your dataset in the following lines:
+     ```
+     ORF_REGEX=..
+     BARCODE_REGEX=.. 
+     ```
+  - Further change the reference file name if needed:
+     ```
+     REFERENCE_FASTA=..
+     ```
+  - A very important section is the assignment of the fastq input file. As certain datasets are very large, a zipped fastq or unzipped one for smaller datasets can be used in the following way:
+    **Case 1: Zipped fastq**
+    ```
+    ZIPPED_FASTQ=zipped.fastq
+    FASTQ=
+    ```
+    ***Case 2: Unzipped fastq**
+    ```
+    ZIPPED_FASTQ=
+    FASTQ=unzipped.fastq
+    ```
+  The wrapper will unzip and assign the unzipped fastq to `FASTQ=` for further usage.
+  - If using more than 5 GPUs make sure to change the value of `NUM_GPUS=5`
+  - No other real changes required. Feel free to change the names of the files if you need to.
+- Once all the required files are present, recheck if all python scripts and the bash wrapper have permission to execute. If not, use:
+    ```
+    chmod +x *.py
+    chmod +x run_pipeline.sh
+    ```
+- Ensure `logs/` directory exists.
+- To submit the job to a HTCondor node, use:
+    ```
+    condor_submit pipeline.submit
+    ```
+- Monitor `logs/pipeline.out` and `logs/pipeline.err` for progress.
 
 ---

@@ -133,8 +133,12 @@ This tarball contains a fully pre-configured conda environment with:
 - Samtools, Bcftools
 - Minimap2
 
-The tarball can be installed from `https://drive.google.com/file/d/1z4pHmtPRKTFgH8KKrdxAghc7tToUImHS/view?usp=drive_link
-`
+[Click here to download the prebuilt conda environment](https://drive.google.com/file/d/1z4pHmtPRKTFgH8KKrdxAghc7tToUImHS/view?usp=drive_link)
+
+
+Once downloaded transfer to your working node using `scp command from your local terminal`
+
+
 **Unpacking and activating:**
 
 ```
@@ -152,7 +156,7 @@ The bash wrapper (`run_pipeline.sh`) performs these steps automatically and also
 
 The pipeline is optimized for distributed compute clusters with GPU support via HTCondor.
 
-### Submit File: `submit_pipeline.sub`
+### Submit File: `pipeline.submit`
 
 - Requests 5 GPUs, 64 GB RAM, and 500 GB disk
 - Runs `run_pipeline.sh`

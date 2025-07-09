@@ -12,7 +12,7 @@ This repository provides a robust and scalable pipeline to process Nanopore sequ
 - Medaka-based GPU-accelerated consensus generation
 - Variant calling using Minimap2, Samtools, and Bcftools
 - HTCondor integration for large-scale deployment
-- Automatic GPU monitoring and conda environment handling
+- Automatic conda environment handling
 
 ---
 

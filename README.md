@@ -235,7 +235,7 @@ This file summarizes per-barcode consensus sequences and variants.
   - The submit file given here is setup to use 5 gpus
   - Make sure to change the names of the fasta and fastq files you want to transfer in the submit file at the following line:
     ```
-    transfer input files = ....
+    transfer_input_files = ....
     ```
   - The amount of disk usage and memory requested in the given submit file is tailored to a different dataset (24 GB fastq file). Feel free to increase or decrease according to your dataset in the following lines:
     ```

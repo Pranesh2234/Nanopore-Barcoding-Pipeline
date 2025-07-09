@@ -96,7 +96,7 @@ Aligns the sequences in each barcode FASTA to a reference using Minimap2, then c
 
 **Input:**  
 - FASTA directory (from step 3)
-- Reference FASTA (e.g., `reference.fasta`)
+- Reference FASTA which is the wild type nucleotide sequence of the protein whose variants are being studied in the fasta format(e.g., `reference.fasta`)
 
 **Output:**  
 - `*_consensus.fa` files for each barcode in a new output directory
@@ -133,9 +133,11 @@ This tarball contains a fully pre-configured conda environment with:
 - Samtools, Bcftools
 - Minimap2
 
+The tarball can be installed from `https://drive.google.com/file/d/1z4pHmtPRKTFgH8KKrdxAghc7tToUImHS/view?usp=drive_link
+`
 **Unpacking and activating:**
 
-```bash
+```
 tar -xzf nanopore_gpuenv.tar.gz
 export PATH=$PWD/nanopore_gpuenv/bin:$PATH
 export LD_LIBRARY_PATH=$PWD/nanopore_gpuenv/lib:$LD_LIBRARY_PATH
@@ -160,8 +162,10 @@ The pipeline is optimized for distributed compute clusters with GPU support via 
 
 - Unzips environment and FASTQ
 - Patches hardcoded Python paths
+- Checks GPU avaialabilty
 - Runs all stages sequentially
-- Logs GPU usage every second
+- This bash wrapper acts as the executable that runs all the other codes of the pipeline.
+- Make sure that it has execue permission by using the command: `chmod +x run_pipeline.sh`
 
 ---
 
@@ -169,23 +173,25 @@ The pipeline is optimized for distributed compute clusters with GPU support via 
 
 ### Local (for small data or testing)
 
-```bash
-bash run_pipeline.sh
-```
+- Use bash to run locally only for very small datasets that your system can handle
+ `bash run_pipeline.sh`
 
+   
 ### HTCondor Cluster
+- Most of the datasets which are large will be run using the HTCondor cluster.
+- For submitting a job to HTC, use the following command after creating a submit file. (for example: pipeline.submimt)
 
-```bash
-condor_submit submit_pipeline.sub
-```
+ `condor_submit pipeline.submit`
 
 ---
 
 ## ⚙️ Regex Customization
 
-You can edit these inside `run_pipeline.sh`:
+- The regular expressions that are used to capture the barcodes and ORFs from the sequencing data are specified inside the bash wrapper.
+- These exressions need to be changed according to users design
+User can edit these inside `run_pipeline.sh`:
 
-```bash
+```
 ORF_REGEX='CTAGT[ATGC]{1000,1200}TAGCT'
 BARCODE_REGEX='CCACG[ATGC]{20}TGAGA'
 ```
@@ -210,6 +216,7 @@ This file summarizes per-barcode consensus sequences and variants.
 
 - Main logs: `logs/`
 - GPU monitoring: `pipeline_results/gpu_log.log`
+- Make sure that before submit `logs/` directory exists
 
 ---
 
@@ -220,7 +227,3 @@ For bugs, feature requests, or help with deployment, open an issue or contact:
 **Pranesh Kulasekhar**
 
 ---
-
-## 📄 License
-
-MIT License

@@ -44,6 +44,8 @@ mkdir -p "$OUTDIR"
 echo "📥 Extracting barcodes..."
 python3 extract_barcodes.py "$FASTQ" "$OUTDIR/parsed.csv" "$ORF_REGEX" "$BARCODE_REGEX"
 
+echo $(date)
+
 head -n 2 "$OUTDIR/parsed.csv"
 
 # Step 2: Count barcodes and export FASTA

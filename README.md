@@ -232,7 +232,10 @@ This file summarizes per-barcode consensus sequences and variants.
   - Transfer to working node using `scp`
 - Create submit file: pipeline.submit
   - A submit file is the way to request resources from HTC.
-  - The submit file given here is setup to use 5 gpus
+  - The submit file given here is setup to use 5 GPUs which is ideal while balancing number of CPUs per GPU. You can request as many as you need by modifying:
+    ```
+    request_gpus = ...
+    ```
   - Make sure to change the names of the fasta and fastq files you want to transfer in the submit file at the following line:
     ```
     transfer_input_files = ....

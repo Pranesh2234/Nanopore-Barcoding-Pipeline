@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import sys
 import os
 import csv
@@ -13,22 +12,11 @@ def export_fasta(input_csv, output_dir):
         for i, row in enumerate(reader):
             barcode = row['Barcode']
             sequences = row['Sequences'].split(';')
-
-            # Trim barcode if present
             trimmed = [s[len(barcode):] if s.startswith(barcode) else s for s in sequences]
-
-            fasta_path = f"{output_dir}/bc{i}.fasta"
-            with open(fasta_path, 'w') as out:
+            with open(f"{output_dir}/bc{i}.fasta", 'w') as out:
                 for j, seq in enumerate(trimmed):
-                    seq = seq.strip().upper()
-                    if not seq:
-                        continue  # skip empty sequences
-                    out.write(f">seq{j+1}\n{seq}\n")
-
-            # If no valid sequences were written, remove the file
-            if os.path.exists(fasta_path) and os.path.getsize(fasta_path) == 0:
-                os.remove(fasta_path)
-
+                    header = f"seq{j+1}" if seq.strip() else f"unknown{j+1}"
+                    out.write(f">{header}\n{seq}\n")
     print(f"[✓] Exported FASTA files to {output_dir}")
 
 if __name__ == "__main__":

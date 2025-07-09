@@ -282,3 +282,12 @@ This file summarizes per-barcode consensus sequences and variants.
 - Monitor `logs/pipeline.out` and `logs/pipeline.err` for progress.
 
 ---
+## Testing the pipeline
+- The test data available can be used to check if the pipeline is functioning as intended.
+- Regex for test data:
+    ```
+    ORF_REGEX='CGTAA[ATGC]{450,950}CGCGG'
+    BARCODE_REGEX='GCTGC[ATGC]{16}CCATT'
+    ```
+    
+  
